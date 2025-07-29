@@ -1,0 +1,167 @@
+{% extends "myapp/base.html" %}
+{% load cart_extras %}
+
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+<!--====== Checkout 2 Part Start ======-->
+<section class="checkout-wrapper pt-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="checkout-style-1">
+                    <div class="checkout-table table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th class="product">Product</th>
+                                    <th class="quantity">Quantity</th>
+                                    <th class="price">Unit Price</th>
+                                    <th class="action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pid, item in cart.items %}
+                                <tr>
+                                    <td>
+                                        <div class="product-cart d-flex">
+                                            <div class="product-thumb" style="width: 50px;">
+                                                <img src="{{ item.image }}" alt="Product" />
+                                            </div>
+                                            <div class="product-content media-body">
+                                                <h5 class="title">
+                                                    <a href="{% url 'product_detail' pid %}">{{ item.name }}</a>
+                                                </h5>
+                                                <span>SHOPit Exclusive</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="product-quantity d-inline-flex">
+                                            <button type="button" id="sub" class="sub">
+                                                <i class="mdi mdi-minus"></i>
+                                            </button>
+                                            <input type="text" value="{{ item.quantity }}" />
+                                            <button type="button" id="add" class="add">
+                                                <i class="mdi mdi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="price">${{ item.price }}</p>
+                                    </td>
+                                    <td>
+                                        <ul class="action">
+                                            <!-- <li>
+                                                <a class="favorite" href="javascript:void(0)"><i
+                                                        class="mdi mdi-heart-outline"></i></a>
+                                            </li> -->
+                                            <li>
+                                                <a class="delete remove-btn" href="javascript:void(0)" data-id="{{ pid }}"><i
+                                                        class="mdi mdi-delete"></i></a>
+                                            </li>
+                                            <!-- <button class="btn btn-outline-danger mt-auto w-100 remove-btn"
+                                                data-id="{{ pid }}">
+                                                <i class="bi bi-trash me-1"></i> Remove
+                                            </button> -->
+                                        </ul>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="checkout-coupon-total checkout-coupon-total-2 d-flex flex-wrap">
+                        <div class="checkout-coupon">
+                            <span>Apply Coupon to get discount!</span>
+                            <form action="#">
+                                <div class="single-form form-default d-flex">
+                                    <div class="form-input form">
+                                        <input type="text" placeholder="Coupon Code" />
+                                    </div>
+                                    <button class="main-btn primary-btn">Apply</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="checkout-total">
+                            <div class="single-total">
+                                <p class="value">Subtotal Price:</p>
+                                <p class="price">$144.00</p>
+                            </div>
+                            <div class="single-total">
+                                <p class="value">Shipping Cost (+):</p>
+                                <p class="price">$10.50</p>
+                            </div>
+                            <div class="single-total">
+                                <p class="value">Discount (-):</p>
+                                <p class="price">$10.50</p>
+                            </div>
+                            <div class="single-total total-payable">
+                                <p class="value">Total Payable:</p>
+                                <p class="price">$165.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="checkout-btn d-sm-flex justify-content-between">
+                        <div class="single-btn">
+                            <a href="javascript:void(0)" class="main-btn primary-btn-border">continue shopping</a>
+                        </div>
+                        <div class="single-btn">
+                            <a href="checkout-page.html" class="main-btn primary-btn">Pay now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====== Checkout 2 Part Ends ======-->
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('.remove-btn').click(function () {
+            let productId = $(this).data('id');
+            let itemElement = $('#cart-item-' + productId);
+
+            if (confirm('Are you sure you want to remove this item?')) {
+                $.ajax({
+                    url: "{% url 'remove_from_cart_ajax' %}",
+                    type: "POST",
+                    data: {
+                        'product_id': productId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            itemElement.remove();
+                            location.reload();
+                        } else {
+                            alert('Failed to remove item.');
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    var stripe = Stripe("{{ STRIPE_PUBLISHABLE_KEY }}");
+    $('#checkout-button').click(function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: '/create-checkout-session/',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function (data) {
+                stripe.redirectToCheckout({ sessionId: data.id });
+            },
+            error: function (err) {
+                alert("Checkout failed.");
+            }
+        })
+    })
+</script>
+{% endblock %}

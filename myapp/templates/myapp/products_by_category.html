@@ -1,0 +1,218 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+
+<!--====== Breadcrumbs Part Start ======-->
+<section class="breadcrumbs-wrapper pt-50 pb-50 bg-primary-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumbs-style breadcrumbs-style-1 d-md-flex justify-content-between align-items-center">
+                    <div class="breadcrumb-left">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                Category
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                {{ category.name }}
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="breadcrumb-right">
+                        <h5 class="heading-5 font-weight-500">Category</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====== Breadcrumbs Part Ends ======-->
+
+<!--====== Category Part Start ======-->
+<section class="category-wrapper pt-50">
+    <div class="container">
+        <div class="row">
+            {% if products %}
+            <div class="col-lg-12">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div
+                            class="breadcrumbs-style breadcrumbs-style-1 d-md-flex justify-content-between align-items-center">
+                            <div class="breadcrumb-left">
+                                <p>Showing 01-09 of 17 Results</p>
+                            </div>
+                            <div class="breadcrumb-right">
+                                <ul class="breadcrumb-list-grid nav nav-tabs border-0" id="myTab" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <a id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+                                            aria-selected="true">
+                                            <i class="mdi mdi-view-list"></i>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <a class="active" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                                            aria-controls="profile" aria-selected="false">
+                                            <i class="mdi mdi-view-grid"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                <div class="row">
+                                    {% for product in products %}
+                                    <div class="col-lg-12">
+                                        <div class="product-style-7 mt-30">
+                                            <div class="product-image">
+                                                <div class="product-active">
+                                                    <div class="product-item active">
+                                                        <img src="{{ product.image.url }}" alt="product" />
+                                                    </div>
+                                                    <div class="product-item">
+                                                        <img src="{{ product.image2.url }}" alt="product" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="product-content">
+                                                <ul class="product-meta">
+                                                    <li>
+                                                        <a class="add-wishlist" href="javascript:void(0)">
+                                                            <i class="mdi mdi-heart-outline"></i>
+                                                            Add to Favorite
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <span><i class="mdi mdi-star"></i> 4.5/5</span>
+                                                    </li>
+                                                </ul>
+                                                <h4 class="title">
+                                                    <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
+                                                </h4>
+                                                <p>Reference 1102</p>
+                                                <span class="price">$ 399</span>
+                                                <a href="javascript:void(0)" class="main-btn primary-btn">
+                                                    <img src="assets/images/icon-svg/cart-4.svg" alt="" />
+                                                    Add to Cart
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="tab-pane fade show active" id="profile" role="tabpanel"
+                                aria-labelledby="profile-tab">
+                                <div class="row">
+                                    {% for product in products %}
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="product-style-1 mt-30">
+                                            <div class="product-image">
+                                                <div class="product-active">
+                                                    <div class="product-item active">
+                                                        <img src="{{ product.image.url }}" alt="product" />
+                                                    </div>
+                                                    <div class="product-item">
+                                                        <img src="{{ product.image2.url }}" alt="product" />
+                                                    </div>
+                                                </div>
+                                                <a class="add-wishlist" href="javascript:void(0)">
+                                                    <i class="mdi mdi-heart-outline"></i>
+                                                </a>
+                                            </div>
+                                            <div class="product-content text-center">
+                                                <h4 class="title">
+                                                    <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
+                                                </h4>
+                                                <p>Reference 1102</p>
+                                                <a href="javascript:void(0)" class="main-btn secondary-1-btn">
+                                                    <img src="assets/images/icon-svg/cart-7.svg" alt="" />
+                                                    $ 399
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="pagination-wrapper pt-70">
+                            <ul class="d-flex justify-content-center">
+                                <li>
+                                    <a href="javascript:void(0)"><i class="lni lni-chevron-left"></i></a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0)" class="active">1</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0)">2</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0)">3</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0)">4</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0)"><i class="lni lni-chevron-right"></i></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 text-center">
+                        <div class="alert alert-warning shadow-sm">
+                            <h4 class="alert-heading">Oops!</h4>
+                            <p class="mb-0">No products found in this category.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</section>
+<!--====== Filter Part Ends ======-->
+
+<!--====== Clients Logo Part Start ======-->
+<section class="clients-logo-section pt-70 pb-70">
+    <div class="container">
+        <div class="row client-logo-active">
+            <div class="col-lg-3">
+                <div class="single-logo-wrapper">
+                    <img src="assets/images/client-logo/uideck-logo.svg" alt="" />
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="single-logo-wrapper">
+                    <img src="assets/images/client-logo/graygrids-logo.svg" alt="" />
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="single-logo-wrapper">
+                    <img src="assets/images/client-logo/lineicons-logo.svg" alt="" />
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="single-logo-wrapper">
+                    <img src="assets/images/client-logo/pagebulb-logo.svg" alt="" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====== Clients Logo Part Ends ======-->
+{% endblock %}
