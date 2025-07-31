@@ -20,7 +20,6 @@ def home(request):
     products = Product.objects.all()
     return render(request, "myapp/index.html", {"products": products, "categories": categories})
 
-
 def register_view(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -32,11 +31,16 @@ def register_view(request):
             return redirect("register")
 
         user = User.objects.create_user(
-            username=username, email=email, password=password
+            username=username,
+            email=email,
+            password=password
         )
+
         login(request, user)
-        return redirect("home")  # or dashboard
+        messages.success(request, "Signed up successfully!")  # ✅ Fix was needed here
+        return redirect("home")
     return render(request, "auth/register.html")
+
 
 
 def login_view(request):
@@ -61,6 +65,14 @@ def logout_view(request):
 
 
 @login_required
+def profile(request, user_id):
+    user = get_object_or_404(User, pk=user_id)  # Fetch the user by ID
+    categories = Category.objects.all()  # Get all categories
+    return render(request, "myapp/profile_details.html", {
+        "user": user,
+        "categories": categories
+    })
+
 def add_to_cart(request):
     if request.method == "POST":
         product_id = request.POST.get("product_id")

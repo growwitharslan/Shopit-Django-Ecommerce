@@ -30,7 +30,7 @@
     <div class="row">
       <div class="col-lg-6 mx-auto">
         <div class="login-registration-style-2 mt-50">
-          <h1 class="heading-4 font-weight-500 title">Login</h1>
+          <h1 class="heading-4 font-weight-500 title text-center">Login</h1>
           <div class="login-registration-form pt-10">
             <form method="POST">
               {% csrf_token %}
@@ -57,14 +57,14 @@
                 </div>
                 <a class="forget" href="#">Forget Password?</a>
               </div>
-              <div class="single-form">
+              <div class="single-form d-flex justify-content-center">
                 <button class="main-btn primary-btn" type="submit">Sign in</button>
               </div>
             </form>
           </div>
           <div class="text-center">
             <p class="login">
-              Don’t have an account? <a href="signup-page.html">Sign up</a>
+              Don’t have an account? <a href="{% url 'register' %}">Sign up</a>
             </p>
             <!-- <p class="account mt-25">Or</p>
             <ul>
