@@ -364,7 +364,12 @@
       ]
     });
   });
-
+  toastr.options = {
+    "closeButton": true,
+    "progressBar": true,
+    "positionClass": "toast-bottom-left",
+    "timeOut": "3000"
+  };
   $('.cart-btn').click(function () {
     const productId = $(this).data('id');
     const quantity = $('#qty-' + productId).val();
@@ -378,9 +383,15 @@
         'csrfmiddlewaretoken': '{{ csrf_token }}'
       },
       success: function (response) {
-        alert("Product added to cart!");
+        // Update cart count UI if you have one
+        $('#cart-count').text(response.cart_count);
+
+        // Show Toastr success notification
+        toastr.success('Product added to cart!');
       }
-    })
-  })
+    });
+  });
+
+
 </script>
 {% endblock %}
