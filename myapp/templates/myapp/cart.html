@@ -1,4 +1,5 @@
 {% extends "myapp/base.html" %}
+{% load static %}
 {% load cart_extras %}
 
 {% block title %}Cart{% endblock %}
@@ -10,13 +11,15 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="checkout-style-1">
+                    {% if cart %}
                     <div class="checkout-table table-responsive">
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th class="product">Product</th>
+                                    <th class="price">Price</th>
                                     <th class="quantity">Quantity</th>
-                                    <th class="price">Unit Price</th>
+                                    <th class="price">Subotal</th>
                                     <th class="action">Action</th>
                                 </tr>
                             </thead>
@@ -37,28 +40,32 @@
                                         </div>
                                     </td>
                                     <td>
+                                        <p class="price">${{ item.price }}</p>
+                                    </td>
+                                    <td>
                                         <div class="product-quantity d-inline-flex">
-                                            <button type="button" id="sub" class="sub">
+                                            <!-- <button type="button" id="sub" class="sub">
                                                 <i class="mdi mdi-minus"></i>
                                             </button>
                                             <input type="text" value="{{ item.quantity }}" />
                                             <button type="button" id="add" class="add">
                                                 <i class="mdi mdi-plus"></i>
-                                            </button>
+                                            </button> -->
+                                            <p class="price">{{ item.quantity }}X</p>
                                         </div>
                                     </td>
                                     <td>
-                                        <p class="price">${{ item.price }}</p>
+                                        <p class="price">${{ item.subtotal }}</p>
                                     </td>
                                     <td>
                                         <ul class="action">
                                             <!-- <li>
-                                                <a class="favorite" href="javascript:void(0)"><i
+                                                <a class="favorite" href="#"><i
                                                         class="mdi mdi-heart-outline"></i></a>
                                             </li> -->
                                             <li>
-                                                <a class="delete remove-btn" href="javascript:void(0)" data-id="{{ pid }}"><i
-                                                        class="mdi mdi-delete"></i></a>
+                                                <a class="delete remove-btn" href="#"
+                                                    data-id="{{ pid }}"><i class="mdi mdi-delete"></i></a>
                                             </li>
                                             <!-- <button class="btn btn-outline-danger mt-auto w-100 remove-btn"
                                                 data-id="{{ pid }}">
@@ -72,7 +79,7 @@
                         </table>
                     </div>
                     <div class="checkout-coupon-total checkout-coupon-total-2 d-flex flex-wrap">
-                        <div class="checkout-coupon">
+                        <!-- <div class="checkout-coupon">
                             <span>Apply Coupon to get discount!</span>
                             <form action="#">
                                 <div class="single-form form-default d-flex">
@@ -82,9 +89,9 @@
                                     <button class="main-btn primary-btn">Apply</button>
                                 </div>
                             </form>
-                        </div>
+                        </div> -->
                         <div class="checkout-total">
-                            <div class="single-total">
+                            <!-- <div class="single-total">
                                 <p class="value">Subtotal Price:</p>
                                 <p class="price">$144.00</p>
                             </div>
@@ -95,21 +102,47 @@
                             <div class="single-total">
                                 <p class="value">Discount (-):</p>
                                 <p class="price">$10.50</p>
-                            </div>
+                            </div> -->
                             <div class="single-total total-payable">
                                 <p class="value">Total Payable:</p>
-                                <p class="price">$165.00</p>
+                                <p class="price">${{ overall_subtotal }}</p>
                             </div>
                         </div>
                     </div>
                     <div class="checkout-btn d-sm-flex justify-content-between">
                         <div class="single-btn">
-                            <a href="javascript:void(0)" class="main-btn primary-btn-border">continue shopping</a>
+                            <a href="{% url 'shop_products' %}" class="main-btn primary-btn-border">continue shopping</a>
                         </div>
+                        {% if request.user.is_authenticated %}
                         <div class="single-btn">
-                            <a href="checkout-page.html" class="main-btn primary-btn">Pay now</a>
+                            <button type="button" id="checkout-button" class="main-btn primary-btn"
+                                style="display: inline-flex; align-items: center; gap: 6px;">
+                                Pay With Stripe
+                            </button>
+
                         </div>
+                        {% else %}
+                        <div class="single-btn">
+                            <a href="{% url 'login' %}" class="main-btn primary-btn"
+                                style="display: inline-flex; align-items: center; gap: 6px;">
+                                Login to Continue
+                            </a>
+
+                        </div>
+                        {% endif %}
+
                     </div>
+                    {% else %}
+                    <div class="text-center p-4">
+                        <img src="{% static 'images/empty_cart.png' %}" alt="Empty Cart" class="img-fluid mb-3"
+                            style="max-width: 200px;">
+                        <h2 class="text-muted">Your cart is empty</h2>
+                        <p class="text-secondary mb-3">Looks like you haven’t added anything yet.</p>
+                        <a href="{% url 'shop_products' %}" class="main-btn primary-btn">Start Shopping</a>
+                    </div>
+
+                    {% endif %}
+
                 </div>
             </div>
         </div>

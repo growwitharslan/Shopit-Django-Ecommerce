@@ -19,6 +19,7 @@ urlpatterns = [
     path('category/<slug:slug>/', views.products_by_category, name='products_by_category'),
     path('/add-to-cart', views.add_to_cart, name= "add_to_cart"),
     path('ajax/remove-from-cart/', views.remove_from_cart_ajax, name='remove_from_cart_ajax'),
+    path('shop_products/', views.shop_products, name='shop_products'),
     path('cart/', views.cart, name='cart'),
 
     path('create-checkout-session/', views.create_checkout_session, name='create_checkout_session'),

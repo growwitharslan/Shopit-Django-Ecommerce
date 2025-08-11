@@ -1,0 +1,129 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+{% block content %}
+
+<!--====== Breadcrumbs Part Start ======-->
+<section class="breadcrumbs-wrapper pt-50 pb-50 bg-primary-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumbs-style breadcrumbs-style-1 d-md-flex justify-content-between align-items-center">
+                    <div class="breadcrumb-left">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                Shop
+                            </li>
+                        </ol>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====== Breadcrumbs Part Ends ======-->
+
+
+<section class="product-wrapper pt-100 pb-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="mb-50">
+                    <h1 class="heading-1 font-weight-700">All Products</h1>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            {% for product in products %}
+            <div class="col-lg-6">
+                <div class="product-style-7 mt-30">
+                    <div class="product-image">
+                        <div class="product-active">
+                            <div class="product-item active">
+                                <img src="{{ product.image.url }}" alt="product" />
+                            </div>
+                            <div class="product-item">
+                                <img src="{{ product.image2.url }}" alt="product" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <ul class="product-meta">
+                            <!-- <li>
+                <a class="add-wishlist" href="javascript:void(0)">
+                  <i class="mdi mdi-heart-outline"></i>
+                </a>
+                Add to Favorite
+              </li>
+              <li>
+                <span><i class="mdi mdi-star"></i> 4.5/5</span>
+              </li> -->
+                            <li class="badge bg-light text-dark rounded">
+                                {{ product.category.name }}
+                            </li>
+
+                        </ul>
+                        <h4 class="title">
+                            <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
+                        </h4>
+                        <p>{{ product.description|slice:":15" }}</p>
+                        <span class="price">$ {{ product.price }}</span>
+                        <div class="product-quantity d-inline-flex">
+                            <div class="mt-3">
+                                <button type="button" id="sub" class="sub">
+                                    <i class="mdi mdi-minus"></i>
+                                </button>
+                                <input id="qty-{{ product.id }}" type="text" value="1" />
+                                <button type="button" id="add" class="add">
+                                    <i class="mdi mdi-plus"></i>
+                                </button>
+                            </div>
+                            <a href="#" class="main-btn primary-btn cart-btn" data-id="{{ product.id }}">
+                                <img src="{% static 'images/icon-svg/cart-4.svg' %}" alt="" />
+                                Add to Cart
+                            </a>
+                        </div>
+                    </div>
+                    <!-- <button class="btn btn-outline-primary mt-auto cart-btn w-100" data-id="{{ product.id }}">
+            <i class="bi bi-cart-plus me-2"></i> Add to Cart
+          </button> -->
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!--====== Clients Logo Part Start ======-->
+<section class="clients-logo-section pt-70 pb-70">
+    <div class="container">
+        <div class="row client-logo-active">
+            <div class="col-lg-3">
+                <div class="single-logo-wrapper">
+                    <img src="{% static 'images/client-logo/uideck-logo.svg' %}" alt="" />
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="single-logo-wrapper">
+                    <img src="{% static 'images/client-logo/graygrids-logo.svg' %}" alt="" />
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="single-logo-wrapper">
+                    <img src="{% static 'images/client-logo/lineicons-logo.svg' %}" alt="" />
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="single-logo-wrapper">
+                    <img src="{% static 'images/client-logo/pagebulb-logo.svg' %}" alt="" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====== Clients Logo Part Ends ======-->
+
+
+
+{% endblock %}

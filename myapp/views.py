@@ -37,7 +37,7 @@ def register_view(request):
         )
 
         login(request, user)
-        messages.success(request, "Signed up successfully!")  # ✅ Fix was needed here
+        messages.success(request, "Signed up successfully!")
         return redirect("home")
     return render(request, "auth/register.html")
 
@@ -77,23 +77,39 @@ def add_to_cart(request):
     if request.method == "POST":
         product_id = request.POST.get("product_id")
         quantity = int(request.POST.get("quantity", 1))
-
         product = get_object_or_404(Product, id=product_id)
+
+        product_price = float(product.price)
+        product_subtotal = product_price * quantity
+
         cart = request.session.get("cart", {})
 
         if str(product_id) in cart:
             cart[str(product_id)]["quantity"] += quantity
+            cart[str(product_id)]["subtotal"] = cart[str(product_id)]["price"] * cart[str(product_id)]["quantity"]
         else:
             cart[str(product_id)] = {
                 "name": product.name,
-                "price": str(product.price),
+                "price": product_price,
                 "image": product.image.url,
                 "quantity": quantity,
+                "subtotal": product_subtotal
             }
+
         request.session["cart"] = cart
-        return JsonResponse({"status": "success", "cart_count": len(cart)})
+        overall_subtotal = sum(item["subtotal"] for item in cart.values())
+
+        return JsonResponse({
+            "status": "success",
+            "cart_count": len(cart),
+            "product_subtotal": round(cart[str(product_id)]["subtotal"], 2),
+            "overall_subtotal": round(overall_subtotal, 2)
+        })
 
     return JsonResponse({"status": "failed"}, status=400)
+
+
+
 
 def remove_from_cart_ajax(request):
     if request.method == "POST":
@@ -113,6 +129,7 @@ def cart(request):
     message = request.session.pop("message", None)
     categories = Category.objects.all()
     products = Product.objects.all()
+    overall_subtotal = sum(item["subtotal"] for item in cart.values())
     return render(
         request,
         "myapp/cart.html",
@@ -121,7 +138,8 @@ def cart(request):
             "STRIPE_PUBLISHABLE_KEY": settings.STRIPE_PUBLISHABLE_KEY,
             "message": message,
             "products": products,
-            "categories": categories
+            "categories": categories,
+            "overall_subtotal": round(overall_subtotal, 2)
         },
     )
 
@@ -202,6 +220,10 @@ def products_by_category(request, slug):
         'categories': categories,
     })
 
+def shop_products(request):
+    categories = Category.objects.all()
+    products = Product.objects.all()
+    return render(request, "myapp/shop_products.html", {"products": products, "categories": categories})
 
 
 
