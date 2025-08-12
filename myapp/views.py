@@ -124,6 +124,7 @@ def cart(request):
     })
 
 # ------------------- Stripe -------------------
+@login_required
 @csrf_exempt
 def create_checkout_session(request):
     if request.method == "POST":
@@ -154,7 +155,6 @@ def create_checkout_session(request):
         )
         return JsonResponse({"id": session.id})
 
-@login_required
 def stripe_success(request):
     cart = request.session.get("cart", {})
 
