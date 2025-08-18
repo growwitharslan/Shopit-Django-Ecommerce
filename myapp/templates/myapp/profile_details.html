@@ -28,79 +28,55 @@
 
 <!--====== Profile Start ======-->
 <section class="profile-wrapper pt-50 pb-100">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-9">
-                <div class="profile">
-                    <div class="profile-header">
-                        <div class="profile">
-                            <!-- <div class="profile-photo">
-                                <img src="{% static 'images/profile-photo.png' %}" alt="Profile Photo" />
-                            </div> -->
-                        
-                        </div>
-                    </div>
-                    <div class="profile-body">
-                        <div class="profile-title">
-                            <h5 class="title">Personal Details</h5>
-                            <a class="profile-link" href="javascript:void(0)">edit</a>
-                        </div>
-                        <div class="profile-details">
-                            <div class="single-details-item d-flex flex-wrap">
-                                <div class="details-title">
-                                    <h6 class="title">User Full Name:</h6>
-                                </div>
-                                <div class="details-content media-body">
-                                    <p>{{ user.username }}</p>
-                                </div>
-                            </div>
-                            <div class="single-details-item d-flex flex-wrap">
-                                <div class="details-title">
-                                    <h6 class="title">Email:</h6>
-                                </div>
-                                <div class="details-content media-body">
-                                    <p>{{ user.email }}</p>
-                                </div>
-                            </div>
-                            <div class="single-details-item d-flex flex-wrap">
-                                <div class="details-title">
-                                    <h6 class="title">Phone:</h6>
-                                </div>
-                                <div class="details-content media-body">
-                                    <p>+123 456 789 0234</p>
-                                </div>
-                            </div>
-                            <div class="single-details-item d-flex flex-wrap">
-                                <div class="details-title">
-                                    <h6 class="title">Address:</h6>
-                                </div>
-                                <div class="details-content media-body">
-                                    <p>Company Inc., 8901 Marmora Road, Glasgow, D04 89GR.</p>
-                                </div>
-                            </div>
-                            <div class="single-details-item d-flex flex-wrap">
-                                <div class="details-title">
-                                    <h6 class="title">Gender:</h6>
-                                </div>
-                                <div class="details-content media-body">
-                                    <p>Male</p>
-                                </div>
-                            </div>
-                            <div class="single-details-item d-flex flex-wrap">
-                                <div class="details-title">
-                                    <h6 class="title">Joined on:</h6>
-                                </div>
-                                <div class="details-content media-body">
-                                    <p>{{ user.date_joined|date:"F j, Y" }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-9">
+        <div class="card shadow-sm border-0">
+          <!-- Profile Header -->
+          <div class="card-header text-white d-flex align-items-center flex-column py-5">
+            <div class="profile-photo mb-3" style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 3px solid #fff;">
+              {% if request.user.profile.image %}
+              <img src="{{ request.user.profile.image.url }}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover;">
+              {% else %}
+              <img src="{% static 'images/default-avatar.png' %}" alt="Default Image" style="width: 100%; height: 100%; object-fit: cover;">
+              {% endif %}
             </div>
+            <h4 class="mb-1">{{ user.username }}</h4>
+            <p class="mb-0">{{ user.email }}</p>
+          </div>
+
+          <!-- Profile Body -->
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="mb-0">Personal Details</h5>
+              <a class="btn btn-outline-primary btn-sm" href="javascript:void(0)">Edit</a>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <strong>Phone:</strong>
+                <p class="mb-0">+123 456 789 0234</p>
+              </div>
+              <div class="col-md-6 mb-3">
+                <strong>Address:</strong>
+                <p class="mb-0">Company Inc., 8901 Marmora Road, Glasgow, D04 89GR.</p>
+              </div>
+              <div class="col-md-6 mb-3">
+                <strong>Gender:</strong>
+                <p class="mb-0">Male</p>
+              </div>
+              <div class="col-md-6 mb-3">
+                <strong>Joined On:</strong>
+                <p class="mb-0">{{ user.date_joined|date:"F j, Y" }}</p>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </section>
+
 <!--====== Profile Ends ======-->
 
 <!--====== Clients Logo Part Start ======-->

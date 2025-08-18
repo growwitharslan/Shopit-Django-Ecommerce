@@ -34,8 +34,11 @@
             Create an Account with
           </h1>
           <div class="login-registration-form pt-10">
-            <form method="POST">
-               {% csrf_token %}
+            <!-- Add enctype for file upload -->
+            <form method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              
+              <!-- Full Name -->
               <div class="single-form form-default form-border text-left">
                 <label>Full Name</label>
                 <div class="row">
@@ -47,28 +50,43 @@
                   </div>
                 </div>
               </div>
+              
+              <!-- Email -->
               <div class="single-form form-default form-border text-left">
                 <label>Email Address</label>
                 <div class="form-input">
                   <input type="email" name="email" placeholder="user@email.com" required/>
-
                   <i class="mdi mdi-email"></i>
                 </div>
               </div>
+              
+              <!-- Password -->
               <div class="single-form form-default form-border text-left">
                 <label>Choose Password</label>
                 <div class="form-input">
                   <input id="password-3" type="password" name="password" placeholder="Password" />
-
                   <i class="mdi mdi-lock"></i>
                   <span toggle="#password-3" class="mdi mdi-eye-outline toggle-password"></span>
                 </div>
               </div>
+              
+              <!-- Profile Image Upload -->
+              <div class="single-form form-default form-border text-left">
+                <label>Profile Image</label>
+                <div class="form-input">
+                  <input type="file" name="image" accept="image/*" />
+                  <i class="mdi mdi-image"></i>
+                </div>
+              </div>
+              
+              <!-- Terms Checkbox -->
               <div class="single-checkbox checkbox-style-3">
                 <input type="checkbox" id="login-3" />
-                <label for="login-3"><span></span> </label>
+                <label for="login-3"><span></span></label>
                 <p>I accept the Terms of Use.</p>
               </div>
+              
+              <!-- Submit -->
               <div class="single-form">
                 <button class="main-btn primary-btn" type="submit">Sign up</button>
               </div>
@@ -77,21 +95,6 @@
           <p class="login">
             Have an account? <a href="{% url 'login' %}">Log in</a>
           </p>
-          <!-- <p class="account">Or</p>
-          <ul>
-            <li>
-              <a href="javascript:void(0)" class="facebook-login-registration">
-                <i class="lni lni-facebook-original"></i>
-                <span>Login with Facebook</span>
-              </a>
-            </li>
-            <li>
-              <a href="javascript:void(0)" class="google-login-registration">
-                <img src="assets/images/google-logo.svg" alt="" />
-                <span>Login with Google</span>
-              </a>
-            </li>
-          </ul> -->
         </div>
       </div>
     </div>

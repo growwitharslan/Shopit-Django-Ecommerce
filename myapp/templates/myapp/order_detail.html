@@ -1,0 +1,133 @@
+{% extends "myapp/base.html" %}
+{% load static %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<section class="checkout-wrapper py-5">
+    <div class="container">
+        <h2 class="mb-4 fw-bold text-dark">My Orders</h2>
+
+        {% if orders_with_items %}
+        {% for data in orders_with_items %}
+        <div class="card shadow-sm mb-4 border-0 rounded-3" id="order-{{ data.order.id }}">
+            <div class="card-body">
+
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                    <div>
+                        <h5 class="fw-semibold mb-1">
+                            <i class="bi bi-receipt-cutoff text-primary me-1"></i>
+                            Order #{{ data.order.id }}
+                        </h5>
+                        <small class="text-muted">
+                            Placed on {{ data.order.created_at|date:"M d, Y H:i" }}
+                        </small>
+                    </div>
+                    <span class="badge fs-6 px-3 py-2
+                        {% if data.order.status == 'Completed' %} bg-success
+                        {% elif data.order.status == 'Pending' or data.order.status == 'Processing' %} bg-warning text-dark
+                        {% elif data.order.status == 'Cancelled' %} bg-danger
+                        {% else %} bg-secondary {% endif %}">
+                        {{ data.order.status }}
+                    </span>
+                </div>
+
+                <!-- Total + Cancel -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <p class="mb-0 fw-semibold fs-5">
+                        Total: <span class="text-primary">${{ data.order.total_amount }}</span>
+                    </p>
+
+                    {% if data.order.status == "Pending" %}
+                    <button class="btn btn-outline-danger btn-sm cancel-order" data-id="{{ data.order.id }}">
+                        <i class="bi bi-x-circle me-1"></i> Cancel Order
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- Items -->
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.items %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                            class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                        <div>
+                                            <h6 class="mb-1">{{ item.product.name }}</h6>
+                                            <small class="text-muted">SHOPit Exclusive</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${{ item.price }}</td>
+                                <td>{{ item.quantity }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+
+        {% else %}
+        <div class="text-center p-5">
+            <img src="{% static 'images/empty_cart.png' %}" alt="No Orders"
+                class="img-fluid mb-3" style="max-width: 200px;">
+            <h3 class="fw-semibold text-muted">No Orders Yet</h3>
+            <p class="text-secondary mb-3">Looks like you haven’t ordered anything yet.</p>
+            <a href="{% url 'shop_products' %}" class="btn btn-primary">
+                <i class="bi bi-shop me-1"></i> Start Shopping
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).on("click", ".cancel-order", function () {
+        let orderId = $(this).data("id");
+        let $orderCard = $("#order-" + orderId);
+
+        if (confirm("Are you sure you want to cancel this order?")) {
+            $.ajax({
+                url: "{% url 'cancel_order' %}",
+                type: "POST",
+                data: {
+                    order_id: orderId,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (response) {
+                    if (response.status === "success") {
+                        // Update status badge instantly
+                        $orderCard.find(".badge")
+                            .removeClass("bg-warning text-dark bg-success")
+                            .addClass("bg-danger")
+                            .text("Cancelled");
+
+                        // Remove cancel button
+                        $orderCard.find(".cancel-order").remove();
+
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -47,3 +47,11 @@ class OrderItem(models.Model):
 class ProductGallery(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='gallery_images')
     image = models.ImageField(upload_to="products/")
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    image = models.ImageField(upload_to="profile_images/", default="profile_images/default.jpg")
+
+    def __str__(self):
+        return self.user.username

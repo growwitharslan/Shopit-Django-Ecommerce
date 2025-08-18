@@ -192,3 +192,85 @@
   </div>
 </section>
  -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ <div class="navbar-cart">
+                                    <a class="icon-btn primary-icon-text icon-text-btn d-flex flex-column justify-content-evenly "
+                                        href="#">
+                                        <i class="fa-solid fa-user"></i>
+                                        <small class="">{{ request.user.username }}</small>
+                                    </a>
+
+                                    <div class="navbar-cart-dropdown">
+                                        <div class="checkout-style-2">
+                                            <div class="checkout-header d-flex justify-content-between">
+                                                <h6 class="title">Your Profile</h6>
+                                            </div>
+
+                                            <div class="checkout-table">
+                                                <table class="table">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="checkout-product" colspan="3">
+                                                                <div class="product-cart d-flex">
+                                                                    <div class="product-thumb">
+                                                                        <i class="fa-solid fa-user fa-2x"></i>
+                                                                    </div>
+                                                                    <div class="product-content media-body">
+                                                                        <h5 class="title">
+                                                                            <a
+                                                                                href="">{{
+                                                                                request.user.username }}</a>
+                                                                        </h5>
+                                                                        <ul>
+                                                                            <li><span>{{ request.user.email }}</span>
+                                                                            </li>
+                                                                            <li><span>Member since: {{
+                                                                                    request.user.date_joined|date:"F j,
+                                                                                    Y" }}</span>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div class="checkout-footer">
+                                                <div class="checkout-btn">
+                                                    <a href="{% url 'profile' request.user.id %}"
+                                                        class="main-btn primary-btn-border">Edit
+                                                        Profile</a>
+                                                    <a href="{% url 'logout' %}" class="main-btn text-danger">Logout</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>

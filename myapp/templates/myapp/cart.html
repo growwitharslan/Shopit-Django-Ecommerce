@@ -25,7 +25,7 @@
                             </thead>
                             <tbody>
                                 {% for pid, item in cart.items %}
-                                <tr>
+                                <tr id="cart-item-{{ pid }}">
                                     <td>
                                         <div class="product-cart d-flex">
                                             <div class="product-thumb" style="width: 50px;">
@@ -44,14 +44,13 @@
                                     </td>
                                     <td>
                                         <div class="product-quantity d-inline-flex">
-                                            <!-- <button type="button" id="sub" class="sub">
+                                            <button type="button" id="sub" class="sub">
                                                 <i class="mdi mdi-minus"></i>
                                             </button>
-                                            <input type="text" value="{{ item.quantity }}" />
+                                            <input type="text" value="{{ item.quantity }}" readonly />
                                             <button type="button" id="add" class="add">
                                                 <i class="mdi mdi-plus"></i>
-                                            </button> -->
-                                            <p class="price">{{ item.quantity }}X</p>
+                                            </button>
                                         </div>
                                     </td>
                                     <td>
@@ -59,18 +58,10 @@
                                     </td>
                                     <td>
                                         <ul class="action">
-                                            <!-- <li>
-                                                <a class="favorite" href="#"><i
-                                                        class="mdi mdi-heart-outline"></i></a>
-                                            </li> -->
                                             <li>
-                                                <a class="delete remove-btn" href="#"
-                                                    data-id="{{ pid }}"><i class="mdi mdi-delete"></i></a>
+                                                <a class="delete remove-btn" href="#" data-id="{{ pid }}"><i
+                                                        class="mdi mdi-delete"></i></a>
                                             </li>
-                                            <!-- <button class="btn btn-outline-danger mt-auto w-100 remove-btn"
-                                                data-id="{{ pid }}">
-                                                <i class="bi bi-trash me-1"></i> Remove
-                                            </button> -->
                                         </ul>
                                     </td>
                                 </tr>
@@ -79,30 +70,8 @@
                         </table>
                     </div>
                     <div class="checkout-coupon-total checkout-coupon-total-2 d-flex flex-wrap">
-                        <!-- <div class="checkout-coupon">
-                            <span>Apply Coupon to get discount!</span>
-                            <form action="#">
-                                <div class="single-form form-default d-flex">
-                                    <div class="form-input form">
-                                        <input type="text" placeholder="Coupon Code" />
-                                    </div>
-                                    <button class="main-btn primary-btn">Apply</button>
-                                </div>
-                            </form>
-                        </div> -->
                         <div class="checkout-total">
-                            <!-- <div class="single-total">
-                                <p class="value">Subtotal Price:</p>
-                                <p class="price">$144.00</p>
-                            </div>
-                            <div class="single-total">
-                                <p class="value">Shipping Cost (+):</p>
-                                <p class="price">$10.50</p>
-                            </div>
-                            <div class="single-total">
-                                <p class="value">Discount (-):</p>
-                                <p class="price">$10.50</p>
-                            </div> -->
+
                             <div class="single-total total-payable">
                                 <p class="value">Total Payable:</p>
                                 <p class="price">${{ overall_subtotal }}</p>
@@ -111,7 +80,8 @@
                     </div>
                     <div class="checkout-btn d-sm-flex justify-content-between">
                         <div class="single-btn">
-                            <a href="{% url 'shop_products' %}" class="main-btn primary-btn-border">continue shopping</a>
+                            <a href="{% url 'shop_products' %}" class="main-btn primary-btn-border">continue
+                                shopping</a>
                         </div>
                         {% if request.user.is_authenticated %}
                         <div class="single-btn">
@@ -153,23 +123,62 @@
 
 {% block scripts %}
 <script>
-    $(document).ready(function () {
-        $('.remove-btn').click(function () {
+    $(function () {
+        // --- Prevent duplicate bindings ---
+        $(document).off("click", ".add");
+        $(document).off("click", ".sub");
+        $(document).off("click", ".remove-btn");
+
+        // Increase quantity
+        $(document).on("click", ".add", function () {
+            let row = $(this).closest("tr");
+            let pid = row.find(".remove-btn").data("id");
+            let qtyInput = row.find("input[type='text']");
+            let quantity = parseInt(qtyInput.val()) + 1;
+            updateCart(pid, quantity, row);
+        });
+
+        // Decrease quantity
+        $(document).on("click", ".sub", function () {
+            let row = $(this).closest("tr");
+            let pid = row.find(".remove-btn").data("id");
+            let qtyInput = row.find("input[type='text']");
+            let quantity = Math.max(parseInt(qtyInput.val()) - 1, 1); // prevent 0
+            updateCart(pid, quantity, row);
+        });
+
+        // Remove cart item
+        $(document).on("click", ".remove-btn", function (e) {
+            e.preventDefault();
             let productId = $(this).data('id');
-            let itemElement = $('#cart-item-' + productId);
+            let row = $('#cart-item-' + productId);
 
             if (confirm('Are you sure you want to remove this item?')) {
                 $.ajax({
                     url: "{% url 'remove_from_cart_ajax' %}",
                     type: "POST",
                     data: {
-                        'product_id': productId,
-                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        product_id: productId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
                     },
                     success: function (response) {
                         if (response.status === 'success') {
-                            itemElement.remove();
-                            location.reload();
+                            row.remove();
+                            $(".total-payable .price").text(`$${response.overall_subtotal}`);
+
+                            if ($('tbody tr').length === 0) {
+                                $(".checkout-style-1").html(`
+                                <div class="text-center p-4">
+                                    <img src="{% static 'images/empty_cart.png' %}" 
+                                         alt="Empty Cart" 
+                                         class="img-fluid mb-3" 
+                                         style="max-width: 200px;">
+                                    <h2 class="text-muted">Your cart is empty</h2>
+                                    <p class="text-secondary mb-3">Looks like you haven’t added anything yet.</p>
+                                    <a href="{% url 'shop_products' %}" class="main-btn primary-btn">Start Shopping</a>
+                                </div>
+                            `);
+                            }
                         } else {
                             alert('Failed to remove item.');
                         }
@@ -177,24 +186,47 @@
                 });
             }
         });
-    });
 
-    var stripe = Stripe("{{ STRIPE_PUBLISHABLE_KEY }}");
-    $('#checkout-button').click(function (e) {
-        e.preventDefault();
-        $.ajax({
-            url: '/create-checkout-session/',
-            type: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            success: function (data) {
-                stripe.redirectToCheckout({ sessionId: data.id });
-            },
-            error: function (err) {
-                alert("Checkout failed.");
-            }
-        })
-    })
+        // --- AJAX update cart function ---
+        function updateCart(productId, quantity, row) {
+            $.ajax({
+                url: "{% url 'add_to_cart' %}",
+                type: "POST",
+                data: {
+                    product_id: productId,
+                    quantity: quantity,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (response) {
+                    if (response.status === "success") {
+                        // ✅ always overwrite with backend’s value
+                        row.find("input[type='text']").val(response.quantity);
+                        row.find("td:nth-child(4) .price").text(`$${response.product_subtotal}`);
+                        $(".total-payable .price").text(`$${response.overall_subtotal}`);
+                    }
+                }
+            });
+        }
+
+
+        // --- Stripe Checkout ---
+        var stripe = Stripe("{{ STRIPE_PUBLISHABLE_KEY }}");
+        $('#checkout-button').click(function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/create-checkout-session/',
+                type: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                success: function (data) {
+                    stripe.redirectToCheckout({ sessionId: data.id });
+                },
+                error: function () {
+                    alert("Checkout failed.");
+                }
+            });
+        });
+    });
 </script>
+
+
 {% endblock %}

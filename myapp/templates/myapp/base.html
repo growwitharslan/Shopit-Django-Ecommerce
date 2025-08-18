@@ -45,10 +45,68 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
     <link rel="stylesheet" type="text/css"
         href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
-        <!-- Toastr CSS -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <style>
+        .navbar-profile {
+            display: inline-block;
+            position: relative;
+        }
 
+        .profile-icon {
+            width: 40px;
+            height: 50px;
+            background-color: #f0f0f0;
+            color: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .profile-icon:hover {
+            background-color: #ddd;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 8px 0;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            display: none;
+            min-width: 150px;
+            z-index: 999;
+        }
+
+        .profile-dropdown .dropdown-btn {
+            display: block;
+            padding: 8px 15px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        /* Blue hover effect */
+        .profile-dropdown .dropdown-btn:hover {
+            background: #542DED;
+            /* Bootstrap primary blue */
+            color: white;
+        }
+
+        .navbar-profile:hover .profile-dropdown {
+            display: block;
+        }
+    </style>
     {% block extra_css %}{% endblock %}
+
 </head>
 
 <body>
@@ -79,118 +137,64 @@
                 <div class="navbar-wrapper">
                     <div class="container-lg">
                         <nav class="main-navbar d-lg-flex justify-content-between align-items-center">
-                            <!-- desktop logo Start -->
+
+                            <!-- desktop logo -->
                             <div class="desktop-logo d-lg-block">
-                                <a href="{% url 'home' %}"><img src="{% static 'images/shopit_logo.png' %}"
-                                        alt="Logo" /></a>
+                                <a href="{% url 'home' %}">
+                                    <img src="{% static 'images/shopit_logo.png' %}" alt="Logo" />
+                                </a>
                             </div>
-                            <!-- desktop logo Ends -->
-                            <div class="navbar-menu-toggle d-lg-block">
+
+                            <!-- mobile menu toggle -->
+                            <div class="navbar-menu-toggle d-lg-none">
                                 <button id="toggle-menu-6" class="menu-toggle">
                                     <span class="toggle-icon"></span>
                                     <span class="toggle-icon"></span>
                                     <span class="toggle-icon"></span>
                                 </button>
                             </div>
-                            <!-- navbar menu Start -->
+
+                            <!-- main menu -->
                             <div class="navbar-menu">
                                 <ul class="main-menu">
-                                    <div class="navbar-close d-lg-none text-right mb-3">
-                                        <a href="#0" id="menu-close">
-                                            <i class="mdi mdi-close"></i>
-                                        </a>
-                                    </div>
+                                    <!-- mobile close button -->
+                                    <li class="d-lg-none text-right mb-3">
+                                        <a href="#0" id="menu-close"><i class="mdi mdi-close"></i></a>
+                                    </li>
 
                                     <li><a href="{% url 'home' %}">Home</a></li>
                                     <li><a href="{% url 'shop_products' %}">Shop</a></li>
 
-                                    <!-- <li class="position-static menu-item-has-children">
-                                        <a href="#0" class="collapsed" data-toggle="collapse"
-                                            data-target="#menuVertical7-1" aria-controls="menuVertical7-1"
-                                            aria-expanded="false" aria-label="Toggle navigation">All Catss <i
-                                                class="mdi mdi-chevron-right"></i>
-                                        </a>
-                                        <!- sub mega dropdown Start -->
-                                    <!-- <ul class="sub-mega-dropdown collapse" id="menuVertical7-1">
-                                            <li>
-                                                <div class="mega-dropdown-menu">
-                                                    <ul class="container mega-dropdown d-flex flex-wrap">
-                                                        <li class="mega-dropdown-list menu-item-has-children">
-                                                            <h6 class="heading-6 font-weight-500 mega-title collapsed"
-                                                                data-toggle="collapse" data-target="#menuVertical7-2"
-                                                                aria-controls="menuVertical7-2" aria-expanded="false"
-                                                                aria-label="Toggle navigation">
-                                                                New Arrivals
-                                                                <i class="mdi mdi-chevron-right"></i>
-                                                            </h6>
-                                                            <ul class="collapse" id="menuVertical7-2">
-                                                                <li><a href="#">Hoodies & Sweatshirts</a>
-                                                                </li>
-                                                                
-                                                            </ul>
-                                                        </li>
-                                                        <li class="mega-dropdown-list menu-item-has-children">
-                                                            <h6 class="heading-6 font-weight-500 mega-title collapsed"
-                                                                data-toggle="collapse" data-target="#menuVertical7-3"
-                                                                aria-controls="menuVertical7-3" aria-expanded="false"
-                                                                aria-label="Toggle navigation">
-                                                                Trending
-                                                                <i class="mdi mdi-chevron-right"></i>
-                                                            </h6>
-                                                            <ul class="collapse" id="menuVertical7-3">
-                                                                <li><a href="#">Dressess</a></li>
-                                                                
-                                                                
-                                                            </ul>
-                                                        </li>
-                                                        <li class="mega-dropdown-list menu-item-has-children">
-                                                            <h6 class="heading-6 font-weight-500 mega-title collapsed"
-                                                                data-toggle="collapse" data-target="#menuVertical7-4"
-                                                                aria-controls="menuVertical7-4" aria-expanded="false"
-                                                                aria-label="Toggle navigation">
-                                                                Accessories
-                                                                <i class="mdi mdi-chevron-right"></i>
-                                                            </h6>
-                                                            <ul class="collapse" id="menuVertical7-4">
-                                                                <li>
-                                                                    <a href="#">Hoodies & Sweatshirts</a>
-                                                                </li>
-                                                                
-                                                            </ul>
-                                                        </li>
-                                                        <li class="mega-dropdown-list">
-                                                            <img src="{% static 'images/menu-slider-1.png' %}" alt="" />
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </li>
-                                        </ul> -->
-                                    <!-- sub mega dropdown Ends -->
-                                    <!-- </li> -->
+                                    <!-- categories -->
                                     <li class="menu-item-has-children">
                                         <a href="#0" class="collapsed" data-toggle="collapse"
-                                            data-target="#menuVertical7-5" aria-controls="menuVertical7-5"
-                                            aria-expanded="false" aria-label="Toggle navigation">Categories <i
-                                                class="mdi mdi-chevron-right"></i></a>
-
-                                        <ul class="sub-menu collapse" id="menuVertical7-5">
+                                            data-target="#categoriesMenu" aria-controls="categoriesMenu"
+                                            aria-expanded="false">
+                                            Categories <i class="mdi mdi-chevron-right"></i>
+                                        </a>
+                                        <ul class="sub-menu collapse" id="categoriesMenu">
                                             {% for category in categories %}
-                                            <li><a href="{% url 'products_by_category' category.slug %}">{{ category.name }}</a></li>
+                                            <li>
+                                                <a href="{% url 'products_by_category' category.slug %}">
+                                                    {{ category.name }}
+                                                </a>
+                                            </li>
                                             {% endfor %}
                                         </ul>
-                                        <!-- sub menu Ends -->
-                                        <!-- </li>
-                                <!- </ul> -->
+                                    </li>
+                                </ul>
                             </div>
-                            <!-- navbar menu Ends -->
-                            <div class="navbar-search-cart d-none d-lg-flex">
-                                <!-- navbar search start -->
-                                <div class="navbar-search search-style-5">
+
+                            <!-- right side: search, cart, profile -->
+                            <div class="navbar-search-cart d-flex align-items-center">
+
+                                <!-- search -->
+                                <div class="navbar-search search-style-5 d-none d-lg-flex">
                                     <div class="search-select">
                                         <div class="select-position">
                                             <select id="select26">
                                                 <option value="" selected>All</option>
-                                                <option value="1">option 01</option>
+                                                <option value="1">Option 01</option>
                                             </select>
                                         </div>
                                     </div>
@@ -201,83 +205,46 @@
                                         <button><i class="lni lni-search-alt"></i></button>
                                     </div>
                                 </div>
-                                <!-- navbar search Ends -->
-                                <!-- navbar cart start -->
-                                <div class="navbar-cart">
-                                    <a class="icon-btn primary-icon-text icon-text-btn" href="{% url 'cart' %}"><img
-                                            src="{% static 'images/icon-svg/cart-1.svg' %}" alt="Icon" />
+
+                                <!-- cart -->
+                                <div class="navbar-cart ml-3">
+                                    <a class="icon-btn primary-icon-text icon-text-btn" href="{% url 'cart' %}">
+                                        <img src="{% static 'images/icon-svg/cart-1.svg' %}" alt="Cart" />
                                     </a>
                                 </div>
-                                <!-- navbar cart Ends -->
 
-
-                                <!-- profile start -->
+                                <!-- profile -->
                                 {% if request.user.is_authenticated %}
-                                <div class="navbar-cart">
-                                    <a class="icon-btn primary-icon-text icon-text-btn d-flex flex-column justify-content-evenly "
-                                        href="#">
-                                        <i class="fa-solid fa-user"></i>
-                                        <small class="">{{ request.user.username }}</small>
-                                    </a>
-
-                                    <div class="navbar-cart-dropdown">
-                                        <div class="checkout-style-2">
-                                            <div class="checkout-header d-flex justify-content-between">
-                                                <h6 class="title">Your Profile</h6>
-                                            </div>
-
-                                            <div class="checkout-table">
-                                                <table class="table">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="checkout-product" colspan="3">
-                                                                <div class="product-cart d-flex">
-                                                                    <div class="product-thumb">
-                                                                        <i class="fa-solid fa-user fa-2x"></i>
-                                                                    </div>
-                                                                    <div class="product-content media-body">
-                                                                        <h5 class="title">
-                                                                            <a
-                                                                                href="{% url 'profile' request.user.id %}">{{ request.user.username }}</a>
-                                                                        </h5>
-                                                                        <ul>
-                                                                            <li><span>{{ request.user.email }}</span>
-                                                                            </li>
-                                                                            <li><span>Member since: {{ request.user.date_joined|date:"F j, Y" }}</span>
-                                                                            </li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                            <div class="checkout-footer">
-                                                <div class="checkout-btn">
-                                                    <a href="{% url 'profile' request.user.id %}"
-                                                        class="main-btn primary-btn-border">Edit
-                                                        Profile</a>
-                                                    <a href="{% url 'logout' %}" class="main-btn text-danger">Logout</a>
-                                                </div>
-                                            </div>
-                                        </div>
+                                <!-- Profile Icon Dropdown -->
+                                <div class="navbar-profile ml-3 position-relative">
+                                    <div class="profile-icon" id="profileIcon"
+                                        style="width: 50px; height: 50px; overflow: hidden; border-radius: 50%;">
+                                        {% if request.user.profile.image %}
+                                        <img src="{{ request.user.profile.image.url }}" alt="Profile Image"
+                                            style="width: 80%; height: 80%; object-fit: cover;" />
+                                        {% else %}
+                                        <span>Profile</span>
+                                        {% endif %}
+                                    </div>
+                                    <!-- Hover Dropdown -->
+                                    <div class="profile-dropdown">
+                                        <a href="{% url 'profile' request.user.id %}" class="dropdown-btn">My
+                                            Profile</a>
+                                        <a href="{% url 'order_detail' %}" class="dropdown-btn">Orders</a>
+                                        <a href="{% url 'logout' %}" class="dropdown-btn">Logout</a>
                                     </div>
                                 </div>
+
                                 {% else %}
-                                <!-- Show login/register button if not authenticated -->
-                                <div class="navbar-cart">
+                                <div class="navbar-cart ml-3">
                                     <a class="icon-btn primary-icon-text icon-text-btn" href="#0">
                                         <i class="fa-solid fa-user"></i>
                                     </a>
-
                                     <div class="navbar-cart-dropdown">
                                         <div class="checkout-style-2">
                                             <div class="checkout-header d-flex justify-content-between">
                                                 <h6 class="title">Welcome</h6>
                                             </div>
-
                                             <div class="checkout-table">
                                                 <table class="table">
                                                     <tbody>
@@ -291,7 +258,7 @@
                                                                 <div
                                                                     class="checkout-btn text-center d-flex flex-column gap-2">
                                                                     <a href="{% url 'login' %}"
-                                                                        class="main-btn primary-btn">Sign In</a><br>
+                                                                        class="main-btn primary-btn mb-2">Sign In</a>
                                                                     <a href="{% url 'register' %}"
                                                                         class="main-btn primary-btn-border">Sign Up</a>
                                                                 </div>
@@ -300,17 +267,10 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-
-                                            <!-- Optionally remove footer if not needed -->
-                                            <!-- <div class="checkout-footer"></div> -->
                                         </div>
                                     </div>
                                 </div>
-
-
                                 {% endif %}
-
-                                <!-- Profile Ends -->
                             </div>
                         </nav>
                     </div>
@@ -321,14 +281,15 @@
         </header>
     </div>
     <!--====== Navbar Style 7 Part Ends ======-->
-{% if messages %}
+
+    {% if messages %}
     {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     {% endfor %}
-{% endif %}
+    {% endif %}
 
     {% block content %}
 
@@ -487,7 +448,7 @@
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Toastr JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     {% block scripts %} {% endblock %}
     <!--====== Bootstrap 5 js ======-->
     <script src="{% static 'js/popper.min.js' %}"></script>
