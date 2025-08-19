@@ -27,7 +27,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+
+    # Third-party apps
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+
+    # Providers (e.g., Google, Facebook)
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+
+
     "myapp.apps.MyappConfig",  # ✅ correct way
+
 ]
 
 
@@ -39,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     'allauth.account.middleware.AccountMiddleware', 
 ]
 
 ROOT_URLCONF = 'SHOPit.urls'
@@ -50,7 +63,6 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.request',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -73,8 +85,20 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES', innodb_strict_mode=1",
+        },
     }
 }
+
+
+# Authentication BAckends /////
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # default
+    'allauth.account.auth_backends.AuthenticationBackend',  # allauth
+)
+LOGIN_REDIRECT_URL = '/'      # redirect after successful login
+LOGOUT_REDIRECT_URL = '/login'     # redirect after logout
 
 
 # Password validation
@@ -123,3 +147,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STRIPE_PUBLISHABLE_KEY = 'pk_test_51PqYzsP2GGN4ZzRm48vYRqcMVs8casyKgShVxDZsCwjwocYalCk66pNFtKzV86KFCdzpLDWAWk8Gmbd8CIN8Q8ur00EszhYMq1'
 STRIPE_SECRET_KEY = 'sk_test_51PqYzsP2GGN4ZzRm2Ab2MEvF8UzZhwK2HYnsBbUSWBpL97RnUbCkz5TYeAQEd3jpVYvWcoA2mOWiZFRyrzpLGulJ00vjhxK09f'
+
+
+SITE_ID = 1
+
+
+
+
+# Limit max lengths for MySQL index compatibility
+ACCOUNT_EMAIL_MAX_LENGTH = 191
+SOCIALACCOUNT_EMAIL_MAX_LENGTH = 191
+SOCIALACCOUNT_PROVIDERS_MAX_LENGTH = 191
+

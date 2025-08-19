@@ -1,4 +1,5 @@
 {% extends 'myapp/base.html' %}
+{% load static %}
 {% block content %}
 <!--====== Breadcrumbs Part Start ======-->
 <section class="breadcrumbs-wrapper pt-50 pb-50 bg-primary-4">
@@ -44,7 +45,7 @@
               <div class="single-form form-default form-border">
                 <label>Your Password</label>
                 <div class="form-input">
-                  <input id="password-7" type="password" name="password" placeholder="Password" required/>
+                  <input id="password-7" type="password" name="password" placeholder="Password" required />
                   <i class="mdi mdi-lock"></i>
                   <span toggle="#password-7" class="mdi mdi-eye-outline toggle-password"></span>
                 </div>
@@ -66,19 +67,20 @@
             <p class="login">
               Don’t have an account? <a href="{% url 'register' %}">Sign up</a>
             </p>
-            <!-- <p class="account mt-25">Or</p>
+            {% load socialaccount %}
+            <p class="account mt-25">Or</p>
             <ul>
               <li>
-                <a href="javascript:void(0)" class="facebook-login-registration">
+                <a href="" class="facebook-login-registration">
                   <i class="lni lni-facebook-original"></i>
                 </a>
               </li>
               <li>
-                <a href="javascript:void(0)" class="google-login-registration">
-                  <img src="assets/images/google-logo.svg" alt="" />
+                <a href="{% provider_login_url 'google' %}" class="google-login-registration">
+                  <img src="{% static 'images/google-logo.svg' %}" alt="" />
                 </a>
               </li>
-            </ul> -->
+            </ul>
           </div>
         </div>
       </div>
