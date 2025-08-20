@@ -40,7 +40,7 @@
                         <div
                             class="breadcrumbs-style breadcrumbs-style-1 d-md-flex justify-content-between align-items-center">
                             <div class="breadcrumb-left">
-                                <p>Showing 01-09 of 17 Results</p>
+                                <p>Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} Results</p>
                             </div>
                             <div class="breadcrumb-right">
                                 <ul class="breadcrumb-list-grid nav nav-tabs border-0" id="myTab" role="tablist">
@@ -61,129 +61,131 @@
                         </div>
 
                         <div class="tab-content" id="myTabContent">
+                            <!-- List View -->
                             <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
-                                <div class="row">
-                                     {% for product in page_obj %}
-                                    <div class="col-lg-12">
-                                        <div class="product-style-7 mt-30">
-                                            <div class="product-image">
-                                                <div class="product-active">
-                                                    <div class="product-item active">
-                                                        <img src="{{ product.image.url }}" alt="product" />
-                                                    </div>
-                                                    <div class="product-item">
-                                                        <img src="{{ product.image2.url }}" alt="product" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="product-content">
-                                                <ul class="product-meta">
-                                                    <li>
-                                                        <a class="add-wishlist" href="javascript:void(0)">
-                                                            <i class="mdi mdi-heart-outline"></i>
-                                                            Add to Favorite
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <span><i class="mdi mdi-star"></i> 4.5/5</span>
-                                                    </li>
-                                                </ul>
-                                                <h4 class="title">
-                                                    <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
-                                                </h4>
-                                                <p>Reference 1102</p>
-                                                <span class="price">$ 399</span>
-                                                <a href="javascript:void(0)"
-                                                    class="main-btn primary-btn add-to-cart-btn"
-                                                    data-id="{{ product.id }}" data-price="{{ product.price }}">
-                                                    <img src="{% static 'images/icon-svg/cart-7.svg' %}" alt="" />
-                                                    Add to Cart
-                                                </a>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            <div class="tab-pane fade show active" id="profile" role="tabpanel"
-                                aria-labelledby="profile-tab">
-                                <div class="row">
-                                    {% for product in page_obj %}
-                                    <div class="col-lg-6 col-sm-6">
-                                        <div class="product-style-1 mt-30">
-                                            <div class="product-image">
-                                                <div class="product-active">
-                                                    <div class="product-item active">
-                                                        <img src="{{ product.image.url }}" alt="product" />
-                                                    </div>
-                                                    <div class="product-item">
-                                                        <img src="{{ product.image2.url }}" alt="product" />
-                                                    </div>
-                                                </div>
-                                                <a class="add-wishlist" href="javascript:void(0)">
-                                                    <i class="mdi mdi-heart-outline"></i>
-                                                </a>
-                                            </div>
-                                            <div class="product-content text-center">
-                                                <h4 class="title">
-                                                    <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
-                                                </h4>
-                                                <p>Reference 1102</p>
-                                                <a href="javascript:void(0)"
-                                                    class="main-btn secondary-1-btn add-to-cart-btn"
-                                                    data-id="{{ product.id }}" data-price="{{ product.price }}">
-                                                    <img src="{% static 'images/icon-svg/cart-7.svg' %}" alt="" />
-                                                    $ {{ product.price }}
-                                                </a>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
+    <div class="row">
+        {% for product in page_obj %}
+        <div class="col-lg-12">
+            <div class="product-style-7 mt-3 p-3 d-flex align-items-center rounded shadow-sm" 
+                 style="background:#f9f9f9; border:1px solid #eee;">
+                 
+                <!-- Product Image -->
+                <div class="product-image me-3" style="width:180px; flex-shrink:0;">
+                    <div class="product-active">
+                        <div class="product-item active" style="height:180px; overflow:hidden; border-radius:8px;">
+                            <img src="{{ product.image.url }}" alt="product"
+                                 class="img-fluid w-100 h-100" style="object-fit:cover;">
+                        </div>
+                        <div class="product-item" style="height:180px; overflow:hidden; border-radius:8px;">
+                            <img src="{{ product.image2.url }}" alt="product"
+                                 class="img-fluid w-100 h-100" style="object-fit:cover;">
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="pagination-wrapper pt-70">
-    <ul class="d-flex justify-content-center">
-        {% if page_obj.has_previous %}
-            <li>
-                <a href="?page={{ page_obj.previous_page_number }}">
-                    <i class="lni lni-chevron-left"></i>
-                </a>
-            </li>
-        {% endif %}
+                <!-- Product Content -->
+                <div class="product-content flex-grow-1 ps-3">
+                    <ul class="product-meta d-flex mb-2" style="list-style:none; padding:0; font-size:14px; color:#777;">
+                        <li><i class="mdi mdi-star text-warning"></i> 4.5/5</li>
+                    </ul>
 
-        {% for num in page_obj.paginator.page_range %}
-            {% if num == page_obj.number %}
-                <li>
-                    <a href="?page={{ num }}" class="active">{{ num }}</a>
-                </li>
-            {% else %}
-                <li>
-                    <a href="?page={{ num }}">{{ num }}</a>
-                </li>
-            {% endif %}
-        {% endfor %}
+                    <h4 class="title mb-1">
+                        <a href="{% url 'product_detail' product.id %}" 
+                           style="text-decoration:none; color:#333;">{{ product.name }}</a>
+                    </h4>
+                    <p class="mb-2 text-muted">Reference 1102</p>
 
-        {% if page_obj.has_next %}
-            <li>
-                <a href="?page={{ page_obj.next_page_number }}">
-                    <i class="lni lni-chevron-right"></i>
-                </a>
-            </li>
-        {% endif %}
-    </ul>
-</div>
-
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="price fw-bold text-dark">$ {{ product.price }}</span>
+                        <a href="#" 
+                           class="main-btn primary-btn add-to-cart-btn px-3 py-2 rounded" 
+                           data-id="{{ product.id }}" data-price="{{ product.price }}">
+                            <img src="{% static 'images/icon-svg/cart-7.svg' %}" alt="" class="me-1" />
+                            Add to Cart
+                        </a>
                     </div>
                 </div>
             </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+                            <!-- Grid View -->
+                            <div class="tab-pane fade show active" id="profile" role="tabpanel"
+     aria-labelledby="profile-tab">
+    <div class="row">
+        {% for product in page_obj %}
+        <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="product-style-1 mt-30">
+                <div class="product-image" style="height:250px; overflow:hidden;">
+                    <div class="product-active h-100">
+                        <div class="product-item active h-100">
+                            <img src="{{ product.image.url }}" alt="product"
+                                 class="img-fluid w-100 h-100" style="object-fit:cover;">
+                        </div>
+                        <div class="product-item h-100">
+                            <img src="{{ product.image2.url }}" alt="product"
+                                 class="img-fluid w-100 h-100" style="object-fit:cover;">
+                        </div>
+                    </div>
+                </div>
+                <div class="product-content text-center">
+                    <h4 class="title">
+                        <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
+                    </h4>
+                    <p>Reference 1102</p>
+                    <a href="javascript:void(0)"
+                       class="main-btn secondary-1-btn add-to-cart-btn"
+                       data-id="{{ product.id }}" data-price="{{ product.price }}">
+                        <img src="{% static 'images/icon-svg/cart-7.svg' %}" alt="" />
+                        $ {{ product.price }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="pagination-wrapper pt-70">
+                            <ul class="d-flex justify-content-center">
+                                {% if page_obj.has_previous %}
+                                <li>
+                                    <a href="?page={{ page_obj.previous_page_number }}">
+                                        <i class="lni lni-chevron-left"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                <li>
+                                    <a href="?page={{ num }}"
+                                        class="{% if num == page_obj.number %}active{% endif %}">{{ num }}</a>
+                                </li>
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                <li>
+                                    <a href="?page={{ page_obj.next_page_number }}">
+                                        <i class="lni lni-chevron-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {% else %}
             <div class="container py-5">
                 <div class="row justify-content-center">
@@ -196,10 +198,10 @@
                 </div>
             </div>
             {% endif %}
-
         </div>
     </div>
 </section>
+
 <!--====== Filter Part Ends ======-->
 
 <!--====== Clients Logo Part Start ======-->
@@ -236,11 +238,11 @@
     $(document).on("click", ".add-to-cart-btn", function () {
         let productId = $(this).data("id");
         toastr.options = {
-      "closeButton": true,
-      "progressBar": true,
-      "positionClass": "toast-bottom-left",
-      "timeOut": "3000"
-    };
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-bottom-right",
+            "timeOut": "3000"
+        };
         $.ajax({
             url: "{% url 'add_to_cart' %}",  // Django URL name for add_to_cart view
             type: "POST",

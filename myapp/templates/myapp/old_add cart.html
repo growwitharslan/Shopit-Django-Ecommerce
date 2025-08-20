@@ -1,276 +1,140 @@
-<div class="container py-5">
-    <h2 class="mb-4 text-center">All Products</h2>
-    <div class="row justify-content-center">
-        {% for product in products %}
-        <div class="col-sm-10 col-md-6 col-lg-4 mb-4 d-flex align-items-stretch">
-            <div class="card shadow h-100">
-                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"
-                    style="height: 220px; object-fit: cover;">
 
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-primary">{{ product.name }}</h5>
-                    <!-- <p class="card-text text-muted text-truncate">{{ product.description }}</p> -->
-                    <strong class="text-success mb-2">{{ product.price }} PKR</strong>
-
-                    {% if product.stock != 0 %}
-                    <div class="mb-3">
-                        <label for="qty-{{ product.id }}" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="qty-{{ product.id }}" min="1"
-                            max="{{ product.stock }}" value="1">
-                    </div>
-
-                    <button class="btn btn-outline-primary mt-auto cart-btn w-100" data-id="{{ product.id }}">
-                        <i class="bi bi-cart-plus me-2"></i> Add to Cart
-                    </button>
-                    {% else %}
-                    <p class="text-danger fw-bold text-center mt-auto">Out of stock</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-<div class="container my-4">
-    <div class="title">
-
-    </div>
-    <div class="d-flex flex-wrap gap-4 justify-content-start">
-        {% for category in categories %}
-        <div class="card shadow-sm border-0" style="width: 150px;">
-            <a href="{% url 'products_by_category' category.slug %}" class="text-decoration-none text-center">
-                <img src="{{ category.image.url }}" class="card-img-top rounded" alt="{{ category.name }}"
-                    style="height: 100px; object-fit: cover;">
-                <div class="card-body p-2">
-                    <h6 class="card-title mb-0 text-dark">{{ category.name }}</h6>
-                </div>
-            </a>
-        </div>
-        {% endfor %}
-    </div>
-</div>
 <script>
-    $('.cart-btn').click(function () {
-        const productId = $(this).data('id');
-        const quantity = $('#qty-' + productId).val();
+    $(function () {
+        // --- Prevent duplicate bindings ---
+        $(document).off("click", ".add");
+        $(document).off("click", ".sub");
+        $(document).off("click", ".remove-btn");
+        // --- Initialize toastr ---
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-bottom-right",
+            "timeOut": "3000"
+        };
 
-        $.ajax({
-            url: "{% url 'add_to_cart' %}",
-            type: "POST",
-            data: {
-                'product_id': productId,
-                'quantity': quantity,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-            },
-            success: function (response) {
-                alert("Product added to cart!");
+        // Increase quantity
+        $(document).on("click", ".add", function () {
+            let row = $(this).closest("tr");
+            let pid = row.find(".remove-btn").data("id");
+            let qtyInput = row.find("input[type='number']");
+            let current = parseInt(qtyInput.val()) || 0;
+            let max = parseInt(qtyInput.attr("max")) || 9999;
+            
+
+            if (current < max) {
+                let quantity = current + 1;
+                updateCart(pid, quantity, row);
+            } else {
+                toastr.warning("Stock limit reached!");
+                
             }
-        })
-    })
+        });
+
+
+
+        // Decrease quantity
+        $(document).on("click", ".sub", function () {
+            let row = $(this).closest("tr");
+            let pid = row.find(".remove-btn").data("id");
+            let qtyInput = row.find("input[type='number']");
+            let quantity = Math.max(parseInt(qtyInput.val()) - 1, 1); // prevent 0
+            updateCart(pid, quantity, row);
+        });
+
+
+        // Remove item from cart
+        $(document).on("click", ".remove-btn", function (e) {
+            e.preventDefault();
+            let productId = $(this).data('id');
+            let row = $('#cart-item-' + productId);
+
+            if (confirm('Are you sure you want to remove this item?')) {
+                $.ajax({
+                    url: "{% url 'remove_from_cart_ajax' %}",
+                    type: "POST",
+                    data: {
+                        product_id: productId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            // remove item row
+                            row.remove();
+
+                            // update totals & count
+                            $(".total-payable .price").text(`$${response.overall_subtotal}`);
+                            $("#cart-count").text(response.cart_count);
+
+                            // show success toast
+                            toastr.success("Item removed from cart!");
+
+                            // handle empty cart
+                            if ($('tbody tr').length === 0) {
+                                $(".checkout-style-1").html(`
+                            <div class="text-center p-4">
+                                <img src="{% static 'images/empty_cart.png' %}" 
+                                     alt="Empty Cart" 
+                                     class="img-fluid mb-3" 
+                                     style="max-width: 200px;">
+                                <h2 class="text-muted">Your cart is empty</h2>
+                                <p class="text-secondary mb-3">Looks like you haven’t added anything yet.</p>
+                                <a href="{% url 'shop_products' %}" class="main-btn primary-btn">Start Shopping</a>
+                            </div>
+                        `);
+                            }
+                        } else {
+                            toastr.error("Failed to remove item.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Something went wrong. Try again!");
+                    }
+                });
+            }
+        });
+
+
+        // --- AJAX update cart function ---
+        function updateCart(productId, quantity, row) {
+            $.ajax({
+                url: "{% url 'add_to_cart' %}",
+                type: "POST",
+                data: {
+                    product_id: productId,
+                    quantity: quantity,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (response) {
+                    if (response.status === "success") {
+                        // ✅ always overwrite with backend’s value
+                        row.find("input[type='text']").val(response.quantity);
+                        row.find("td:nth-child(4) .price").text(`$${response.product_subtotal}`);
+                        $(".total-payable .price").text(`$${response.overall_subtotal}`);
+                    }
+                }
+            });
+        }
+
+
+        // --- Stripe Checkout ---
+        var stripe = Stripe("{{ STRIPE_PUBLISHABLE_KEY }}");
+        $('#checkout-button').click(function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/create-checkout-session/',
+                type: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                success: function (data) {
+                    stripe.redirectToCheckout({ sessionId: data.id });
+                },
+                error: function () {
+                    alert("Checkout failed.");
+                }
+            });
+        });
+    });
 </script>
 
 
 
-
-
-
-
-
-
-
-
-<!-- cart code old -->
-
-{% if message %}
-<div class="alert alert-{{ message.type }} alert-dismissible fade show" role="alert">
-    {{ message.text }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endif %}
-
-
-
-<div class="container my-5">
-    <h3 class="mb-4 text-center">Your Cart</h3>
-    <div class="row">
-        {% for pid, item in cart.items %}
-        <div class="col-sm-10 col-md-6 col-lg-4 mb-4 mx-auto" id="cart-item-{{ pid }}">
-            <div class="card shadow-sm h-100">
-                <img src="{{ item.image }}" class="card-img-top" alt="{{ item.name }}"
-                    style="height: 180px; object-fit: cover;">
-
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-dark">{{ item.name }}</h5>
-                    <p class="card-text mb-1">
-                        <strong class="text-muted">Unit Price:</strong> {{ item.price }} PKR
-                    </p>
-                    <p class="card-text mb-1">
-                        <strong class="text-muted">Quantity:</strong> {{ item.quantity }}
-                    </p>
-                    <p class="card-text mb-3">
-                        <strong class="text-muted">Subtotal:</strong>
-                        <span class="text-success">{{ item.price|mul:item.quantity|floatformat:2 }} PKR</span>
-                    </p>
-
-                    <button class="btn btn-outline-danger mt-auto w-100 remove-btn" data-id="{{ pid }}">
-                        <i class="bi bi-trash me-1"></i> Remove
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 text-center mt-4">
-            <button class="btn btn-primary btn-lg px-5 py-2" id="checkout-button" type="button">
-                <i class="bi bi-cart-check me-2"></i> Pay with Stripe
-            </button>
-        </div> 
-                            {% empty %}
-                            <div class="col-12">
-                             <div class="alert alert-info text-center">Your cart is empty.</div>
-                        </div>
-        {% endfor %}
-    </div>
-</div>
-</div>
-<!-- cart code old -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- Featured Items Dummy Card
-
-<section class="product-wrapper pt-100 pb-70">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="mb-50">
-          <h1 class="heading-1 font-weight-700">Featured Items</h1>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-lg-4 col-sm-6">
-        <div class="product-style-1 mt-30">
-          <div class="product-image">
-            <span class="icon-text text-style-1">20% off</span>
-            <div class="product-active">
-              <div class="product-item active">
-                <img src="{% static 'images/product-1/product-5.jpg' %}" alt="product" />
-              </div>
-              <div class="product-item">
-                <img src="{% static 'images/product-1/product-6.jpg' %}" alt="product" />
-              </div>
-            </div>
-            <a class="add-wishlist" href="javascript:void(0)">
-              <i class="mdi mdi-heart-outline"></i>
-            </a>
-          </div>
-          <div class="product-content text-center">
-            <h4 class="title">
-              <a href="product-details-page.html">Lady Shoe</a>
-            </h4>
-            <p>Reference 1103</p>
-            <a href="javascript:void(0)" class="main-btn secondary-1-btn">
-              <img src="{% static 'images/icon-svg/cart-7' %}" alt="" />
-              $ 399
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
- -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- <div class="navbar-cart">
-                                    <a class="icon-btn primary-icon-text icon-text-btn d-flex flex-column justify-content-evenly "
-                                        href="#">
-                                        <i class="fa-solid fa-user"></i>
-                                        <small class="">{{ request.user.username }}</small>
-                                    </a>
-
-                                    <div class="navbar-cart-dropdown">
-                                        <div class="checkout-style-2">
-                                            <div class="checkout-header d-flex justify-content-between">
-                                                <h6 class="title">Your Profile</h6>
-                                            </div>
-
-                                            <div class="checkout-table">
-                                                <table class="table">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="checkout-product" colspan="3">
-                                                                <div class="product-cart d-flex">
-                                                                    <div class="product-thumb">
-                                                                        <i class="fa-solid fa-user fa-2x"></i>
-                                                                    </div>
-                                                                    <div class="product-content media-body">
-                                                                        <h5 class="title">
-                                                                            <a
-                                                                                href="">{{
-                                                                                request.user.username }}</a>
-                                                                        </h5>
-                                                                        <ul>
-                                                                            <li><span>{{ request.user.email }}</span>
-                                                                            </li>
-                                                                            <li><span>Member since: {{
-                                                                                    request.user.date_joined|date:"F j,
-                                                                                    Y" }}</span>
-                                                                            </li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                            <div class="checkout-footer">
-                                                <div class="checkout-btn">
-                                                    <a href="{% url 'profile' request.user.id %}"
-                                                        class="main-btn primary-btn-border">Edit
-                                                        Profile</a>
-                                                    <a href="{% url 'logout' %}" class="main-btn text-danger">Logout</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>

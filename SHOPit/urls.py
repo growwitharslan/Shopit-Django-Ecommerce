@@ -31,6 +31,8 @@ urlpatterns = [
     path('create-checkout-session/', views.create_checkout_session, name='create_checkout_session'),
     path('checkout-success/', views.stripe_success, name='checkout_success'),
     path('checkout-cancelled/', views.stripe_cancel, name='checkout_cancel'),
+    path("webhooks/stripe/", views.stripe_webhook, name="stripe-webhook"),
+    path("refund-order/", views.refund_order, name="refund_order"),
 
 ]
 

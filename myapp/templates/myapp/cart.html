@@ -47,7 +47,8 @@
                                             <button type="button" id="sub" class="sub">
                                                 <i class="mdi mdi-minus"></i>
                                             </button>
-                                            <input type="text" value="{{ item.quantity }}" readonly />
+                                            <input type="number" value="{{ item.quantity }}" max="{{ item.stock }}"
+                                                readonly />
                                             <button type="button" id="add" class="add">
                                                 <i class="mdi mdi-plus"></i>
                                             </button>
@@ -69,15 +70,16 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="checkout-coupon-total checkout-coupon-total-2 d-flex flex-wrap">
-                        <div class="checkout-total">
-
-                            <div class="single-total total-payable">
-                                <p class="value">Total Payable:</p>
-                                <p class="price">${{ overall_subtotal }}</p>
+                    <!-- Totals -->
+                    <div class="checkout-coupon-total checkout-coupon-total-2 d-flex justify-content-end mb-2">
+                        <div class="checkout-total text-end">
+                            <div class="single-total total-payable bg-light p-3 rounded-3 shadow-sm">
+                                <p class="value mb-1 fw-semibold">Total Payable:</p>
+                                <p class="price h5 fw-bold text-dark">${{ overall_subtotal }}</p>
                             </div>
                         </div>
                     </div>
+
                     <div class="checkout-btn d-sm-flex justify-content-between">
                         <div class="single-btn">
                             <a href="{% url 'shop_products' %}" class="main-btn primary-btn-border">continue
@@ -128,26 +130,45 @@
         $(document).off("click", ".add");
         $(document).off("click", ".sub");
         $(document).off("click", ".remove-btn");
+        // --- Initialize toastr ---
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-bottom-right",
+            "timeOut": "3000"
+        };
 
         // Increase quantity
         $(document).on("click", ".add", function () {
             let row = $(this).closest("tr");
             let pid = row.find(".remove-btn").data("id");
-            let qtyInput = row.find("input[type='text']");
-            let quantity = parseInt(qtyInput.val()) + 1;
-            updateCart(pid, quantity, row);
+            let qtyInput = row.find("input[type='number']");
+            let current = parseInt(qtyInput.val()) || 0;
+            let max = parseInt(qtyInput.attr("max")) || 9999;
+            
+
+            if (current < max) {
+                let quantity = current + 1;
+                updateCart(pid, quantity, row);
+            } else {
+                toastr.warning("Stock limit reached!");
+                
+            }
         });
+
+
 
         // Decrease quantity
         $(document).on("click", ".sub", function () {
             let row = $(this).closest("tr");
             let pid = row.find(".remove-btn").data("id");
-            let qtyInput = row.find("input[type='text']");
+            let qtyInput = row.find("input[type='number']");
             let quantity = Math.max(parseInt(qtyInput.val()) - 1, 1); // prevent 0
             updateCart(pid, quantity, row);
         });
 
-        // Remove cart item
+
+        // Remove item from cart
         $(document).on("click", ".remove-btn", function (e) {
             e.preventDefault();
             let productId = $(this).data('id');
@@ -163,29 +184,41 @@
                     },
                     success: function (response) {
                         if (response.status === 'success') {
+                            // remove item row
                             row.remove();
-                            $(".total-payable .price").text(`$${response.overall_subtotal}`);
 
+                            // update totals & count
+                            $(".total-payable .price").text(`$${response.overall_subtotal}`);
+                            $("#cart-count").text(response.cart_count);
+
+                            // show success toast
+                            toastr.success("Item removed from cart!");
+
+                            // handle empty cart
                             if ($('tbody tr').length === 0) {
                                 $(".checkout-style-1").html(`
-                                <div class="text-center p-4">
-                                    <img src="{% static 'images/empty_cart.png' %}" 
-                                         alt="Empty Cart" 
-                                         class="img-fluid mb-3" 
-                                         style="max-width: 200px;">
-                                    <h2 class="text-muted">Your cart is empty</h2>
-                                    <p class="text-secondary mb-3">Looks like you haven’t added anything yet.</p>
-                                    <a href="{% url 'shop_products' %}" class="main-btn primary-btn">Start Shopping</a>
-                                </div>
-                            `);
+                            <div class="text-center p-4">
+                                <img src="{% static 'images/empty_cart.png' %}" 
+                                     alt="Empty Cart" 
+                                     class="img-fluid mb-3" 
+                                     style="max-width: 200px;">
+                                <h2 class="text-muted">Your cart is empty</h2>
+                                <p class="text-secondary mb-3">Looks like you haven’t added anything yet.</p>
+                                <a href="{% url 'shop_products' %}" class="main-btn primary-btn">Start Shopping</a>
+                            </div>
+                        `);
                             }
                         } else {
-                            alert('Failed to remove item.');
+                            toastr.error("Failed to remove item.");
                         }
+                    },
+                    error: function () {
+                        toastr.error("Something went wrong. Try again!");
                     }
                 });
             }
         });
+
 
         // --- AJAX update cart function ---
         function updateCart(productId, quantity, row) {

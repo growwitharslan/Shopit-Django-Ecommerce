@@ -104,6 +104,11 @@
         .navbar-profile:hover .profile-dropdown {
             display: block;
         }
+
+        .toast-success {
+            background-color: #542DED !important;
+            color: #fff !important;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 
@@ -190,26 +195,25 @@
 
                                 <!-- search -->
                                 <div class="navbar-search search-style-5 d-none d-lg-flex">
-                                    <div class="search-select">
-                                        <div class="select-position">
-                                            <select id="select26">
-                                                <option value="" selected>All</option>
-                                                <option value="1">Option 01</option>
-                                            </select>
+                                    <form method="get" action="{% url 'shop_products' %}" class="d-flex">
+                                        <div class="search-input">
+                                            <input type="text" name="q" placeholder="Search"
+                                                value="{{ query|default:'' }}">
                                         </div>
-                                    </div>
-                                    <div class="search-input">
-                                        <input type="text" placeholder="Search" />
-                                    </div>
-                                    <div class="search-btn">
-                                        <button><i class="lni lni-search-alt"></i></button>
-                                    </div>
+                                        <div class="search-btn">
+                                            <button type="submit"><i class="lni lni-search-alt"></i></button>
+                                        </div>
+                                    </form>
                                 </div>
+
 
                                 <!-- cart -->
                                 <div class="navbar-cart ml-3">
                                     <a class="icon-btn primary-icon-text icon-text-btn" href="{% url 'cart' %}">
                                         <img src="{% static 'images/icon-svg/cart-1.svg' %}" alt="Cart" />
+                                        <span class="icon-text text-style-1"
+                                            id="cart-count">{{request.session.cart|length|default:0 }}</span>
+
                                     </a>
                                 </div>
 
@@ -338,20 +342,17 @@
                             behind-the-scenes content straight.
                         </p>
                     </div>
-                    <div class="subscribe-form">
-                        <form action="#">
-                            <div class="single-form form-default">
-                                <label class="text-white-50">Enter your email address</label>
-                                <div class="form-input">
-                                    <input type="text" placeholder="user@email.com" />
-                                    <i class="mdi mdi-account"></i>
-                                    <button class="main-btn primary-btn">
-                                        <span class="mdi mdi-send"></span>
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="form-input d-flex align-items-center">
+                        <form method="POST" action="" class="w-100 d-flex">
+                            {% csrf_token %}
+                            <input type="text" name="user_email" class="form-control" placeholder="user@email.com"
+                                value="{{ request.user.email|default:'' }}" />
+                            <button type="submit" class="main-btn primary-btn ml-2">
+                                <span class="mdi mdi-send"></span>
+                            </button>
                         </form>
                     </div>
+
                 </div>
             </div>
         </div>

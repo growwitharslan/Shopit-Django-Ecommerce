@@ -25,21 +25,21 @@
         style="background-image: url('{% static 'images/header-1/header-big-1.jpg' %}');">
         <div class="header-item-content">
           <h3 class="title">Don’t say it with flowers: A NOMOS watch is a gift that lasts</h3>
-          <a href="javascript:void(0)" class="link">Our Valentine's Day collection</a>
+          <a href="#" class="link">Our Valentine's Day collection</a>
         </div>
       </div>
       <div class="single-header-item bg_cover"
         style="background-image: url('{% static 'images/header-1/header-big-2.jpg' %}');">
         <div class="header-item-content">
           <h3 class="title">Don’t say it with flowers: A NOMOS watch is a gift that lasts</h3>
-          <a href="javascript:void(0)" class="link">Our Valentine's Day collection</a>
+          <a href="#" class="link">Our Valentine's Day collection</a>
         </div>
       </div>
       <div class="single-header-item bg_cover"
         style="background-image: url('{% static 'images/header-1/header-big-1.jpg' %}');">
         <div class="header-item-content">
           <h3 class="title">Don’t say it with flowers: A NOMOS watch is a gift that lasts</h3>
-          <a href="javascript:void(0)" class="link">Our Valentine's Day collection</a>
+          <a href="#" class="link">Our Valentine's Day collection</a>
         </div>
       </div>
     </div>
@@ -50,7 +50,7 @@
       <div class="product-content">
         <h4 class="title"><a href="product-details-page.html">Metro 38 Date</a></h4>
         <p>Reference 1102</p>
-        <a href="javascript:void(0)" class="main-btn primary-btn-border">
+        <a href="#" class="main-btn primary-btn-border">
           <img src="{% static 'images/icon-svg/cart-5.svg' %}" alt=""> $399
         </a>
       </div>
@@ -60,7 +60,7 @@
       <div class="product-content">
         <h4 class="title"><a href="product-details-page.html">Metro 38 Date</a></h4>
         <p>Reference 1102</p>
-        <a href="javascript:void(0)" class="main-btn primary-btn-border">
+        <a href="#" class="main-btn primary-btn-border">
           <img src="{% static 'images/icon-svg/cart-5.svg' %}" alt=""> $399
         </a>
       </div>
@@ -80,10 +80,10 @@
           </div>
           <div class="content-content">
             <h4 class="title">
-              <a href="javascript:void(0)">Two-hour delivery</a>
+              <a href="#">Two-hour delivery</a>
             </h4>
             <p>Available in most metros on selected in-stock products</p>
-            <a href="javascript:void(0)" class="more">learn more</a>
+            <a href="#" class="more">learn more</a>
           </div>
         </div>
       </div>
@@ -94,10 +94,10 @@
           </div>
           <div class="content-content">
             <h4 class="title">
-              <a href="javascript:void(0)">Get help buying</a>
+              <a href="#">Get help buying</a>
             </h4>
             <p>Have a question? Call a Specialist or chat online for help</p>
-            <a href="contact-page.html" class="more">Contact us</a>
+            <a href="#" class="more">Contact us</a>
           </div>
         </div>
       </div>
@@ -108,10 +108,10 @@
           </div>
           <div class="content-content">
             <h4 class="title">
-              <a href="javascript:void(0)">Find the card for you</a>
+              <a href="#">Find the card for you</a>
             </h4>
             <p>Get 3% Daily Cash with special financing offers from us</p>
-            <a href="javascript:void(0)" class="more">learn more</a>
+            <a href="#" class="more">learn more</a>
           </div>
         </div>
       </div>
@@ -207,43 +207,33 @@
     </div>
 
     <!-- Pagination -->
-    <div class="row mt-4">
-      <div class="col-12">
-        <nav aria-label="Page navigation">
-          <ul class="pagination justify-content-center">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="pagination-wrapper pt-70">
+          <ul class="d-flex justify-content-center">
             {% if page_obj.has_previous %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
+            <li>
+              <a href="?page={{ page_obj.previous_page_number }}">
+                <i class="lni lni-chevron-left"></i>
               </a>
-            </li>
-            {% else %}
-            <li class="page-item disabled">
-              <span class="page-link">&laquo;</span>
             </li>
             {% endif %}
 
             {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %} <li class="page-item"><a
-                class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-              {% endif %}
-              {% endfor %}
+            <li>
+              <a href="?page={{ num }}" class="{% if num == page_obj.number %}active{% endif %}">{{ num }}</a>
+            </li>
+            {% endfor %}
 
-              {% if page_obj.has_next %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                  <span aria-hidden="true">&raquo;</span>
-                </a>
-              </li>
-              {% else %}
-              <li class="page-item disabled">
-                <span class="page-link">&raquo;</span>
-              </li>
-              {% endif %}
+            {% if page_obj.has_next %}
+            <li>
+              <a href="?page={{ page_obj.next_page_number }}">
+                <i class="lni lni-chevron-right"></i>
+              </a>
+            </li>
+            {% endif %}
           </ul>
-        </nav>
+        </div>
       </div>
     </div>
 
@@ -392,7 +382,7 @@
     toastr.options = {
       "closeButton": true,
       "progressBar": true,
-      "positionClass": "toast-bottom-left",
+      "positionClass": "toast-bottom-right",
       "timeOut": "3000"
     };
     $('.cart-btn').click(function () {
@@ -416,7 +406,7 @@
         }
       });
     });
-    
+
   });
 </script>
 {% endblock %}

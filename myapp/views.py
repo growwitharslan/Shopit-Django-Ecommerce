@@ -9,17 +9,21 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 from .models import Product, Category, Order, OrderItem
-
+from django.views.decorators.http import require_POST
+from django.http import HttpResponse
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
 
 # ------------------- Home -------------------
 def home(request):
     categories = Category.objects.all()
     products = Product.objects.all().order_by('-id')  # latest first
 
-    # Pagination: 6 products per page (you can change this)
-    paginator = Paginator(products, 6)
+    # Pagination: 12 products per page (you can change this)
+    paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -98,17 +102,18 @@ def add_to_cart(request):
             "name": product.name,
             "price": float(product.price),
             "image": product.image.url,
+            "stock": product.stock,
             "quantity": quantity,
             "subtotal": float(product.price) * quantity
         }
 
         request.session["cart"] = cart
         overall_subtotal = sum(item["subtotal"] for item in cart.values())
-
+        cart_count = sum(item["quantity"] for item in cart.values())
         return JsonResponse({
             "status": "success",
             "quantity": cart[str(product_id)]["quantity"],  # ✅ always send real stored quantity
-            "cart_count": len(cart),
+            "cart_count": cart_count,            
             "product_subtotal": round(cart[str(product_id)]["subtotal"], 2),
             "overall_subtotal": round(overall_subtotal, 2)
         })
@@ -129,7 +134,7 @@ def remove_from_cart_ajax(request):
             overall_subtotal = sum(item["subtotal"] for item in cart.values())
             return JsonResponse({
                 "status": "success",
-                "cart_count": len(cart),
+                "cart_count": sum(item["quantity"] for item in cart.values()),
                 "overall_subtotal": round(overall_subtotal, 2)
             })
 
@@ -150,7 +155,6 @@ def cart(request):
 
 # ------------------- Stripe -------------------
 @login_required
-@csrf_exempt
 def create_checkout_session(request):
     if request.method == "POST":
         cart = request.session.get("cart", {})
@@ -177,28 +181,11 @@ def create_checkout_session(request):
             mode="payment",
             success_url="http://127.0.0.1:8000/checkout-success/",
             cancel_url="http://127.0.0.1:8000/checkout-cancelled/",
-        )
+            client_reference_id=request.user.id,  # ✅ attach user
+     )
         return JsonResponse({"id": session.id})
 
 def stripe_success(request):
-    cart = request.session.get("cart", {})
-
-    if not cart:
-        messages.error(request, "Cart is empty. Cannot create order.")
-        return redirect("cart")
-
-    total_amount = sum(Decimal(item["subtotal"]) for item in cart.values())
-    order = Order.objects.create(user=request.user, total_amount=total_amount, status="Paid")
-
-    for product_id, item in cart.items():
-        product = Product.objects.get(id=product_id)
-        OrderItem.objects.create(
-            order=order,
-            product=product,
-            quantity=item["quantity"],
-            price=Decimal(item["price"])
-        )
-
     request.session["cart"] = {}
     messages.success(request, "Payment successful! Thank you for your order.")
     return redirect("order_detail")
@@ -214,7 +201,7 @@ def products_by_category(request, slug):
     
     products = Product.objects.filter(category=category).order_by('-id')  # latest first
     
-    paginator = Paginator(products, 9)  # 9 products per page
+    paginator = Paginator(products, 12)  # 12 products per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
@@ -225,20 +212,49 @@ def products_by_category(request, slug):
         'total_products': products.count()
     })
 
+# ------------------- Refund Management -------------------
+@require_POST
+@login_required
+def refund_order(request):
+    order_id = request.POST.get("order_id")
+
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+
+        if order.status == "Completed":
+            order.status = "Refunded"
+            order.save()
+            return JsonResponse({"status": "success", "message": "Refund process will be soon."})
+        else:
+            return JsonResponse({"status": "error", "message": "Only completed orders can be refunded"})
+
+    except Order.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Order not found"})
+
+
+
 def shop_products(request):
     categories = Category.objects.all()
-    products = Product.objects.all().order_by('-id')  # latest first
+    query = request.GET.get("q")  # search keyword
+    products = Product.objects.all().order_by("-id")  # latest first
 
-    # Pagination: 6 products per page (you can adjust)
-    paginator = Paginator(products, 6)
-    page_number = request.GET.get('page')
+    if query:
+        products = products.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        ).order_by("-id")
+
+    # Pagination: 12 products per page
+    paginator = Paginator(products, 12)
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     return render(request, "myapp/shop_products.html", {
         "categories": categories,
         "page_obj": page_obj,
-        "total_products": products.count()
+        "total_products": products.count(),
+        "query": query,   # so you can keep the search box filled
     })
+
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -251,6 +267,8 @@ def product_detail(request, product_id):
     })
 
 def order_detail(request):
+    cancelable_statuses = ["Pending", "Paid"]
+    refundable_statuses = ["Delivered", "Completed"]
     orders = Order.objects.filter(user=request.user).order_by("-created_at")
     orders_with_items = []
 
@@ -265,7 +283,9 @@ def order_detail(request):
 
     return render(request, "myapp/order_detail.html", {
         "orders_with_items": orders_with_items,
-        "categories": categories
+        "categories": categories,
+        "cancelable_statuses": cancelable_statuses,
+        "refundable_statuses": refundable_statuses,
     })
 
 
@@ -283,3 +303,69 @@ def cancel_order(request):
             return JsonResponse({"status": "error", "message": "Order cannot be cancelled."}, status=400)
 
     return JsonResponse({"status": "error", "message": "Invalid request method."}, status=400)
+
+
+
+@require_POST
+@csrf_exempt  # Stripe won't send CSRF tokens
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+    except ValueError:
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError:
+        return HttpResponse(status=400)
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+
+        # Optional: retrieve line items
+        line_items = stripe.checkout.Session.list_line_items(session["id"], limit=100)
+
+        # Get user (if logged in you can pass `client_reference_id` in create_checkout_session)
+        user_id = session.get("client_reference_id")
+        user = None
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                pass
+
+        # Calculate total from Stripe session
+        total_amount = Decimal(session["amount_total"]) / 100
+
+        # Create order
+        order = Order.objects.create(
+            user=user,
+            total_amount=total_amount,
+            status="Paid",
+        )
+
+        # Create items
+        for item in line_items["data"]:
+            name = item["description"]
+            quantity = item["quantity"]
+            unit_amount = Decimal(item["price"]["unit_amount"]) / 100
+
+            # Find product by name (⚠️ better: pass product_id in metadata at checkout)
+            try:
+                product = Product.objects.get(name=name)
+            except Product.DoesNotExist:
+                continue
+
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=quantity,
+                price=unit_amount
+            )
+
+            # Decrement stock
+            product.stock -= quantity
+            product.save()
+
+    return HttpResponse(status=200)
