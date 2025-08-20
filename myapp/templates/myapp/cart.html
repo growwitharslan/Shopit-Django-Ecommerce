@@ -109,7 +109,7 @@
                         <img src="{% static 'images/empty_cart.png' %}" alt="Empty Cart" class="img-fluid mb-3"
                             style="max-width: 200px;">
                         <h2 class="text-muted">Your cart is empty</h2>
-                        <p class="text-secondary mb-3">Looks like you haven’t added anything yet.</p>
+                        <p class="text-secondary mb-3">Looks like you have not added anything yet.</p>
                         <a href="{% url 'shop_products' %}" class="main-btn primary-btn">Start Shopping</a>
                     </div>
 
@@ -194,7 +194,7 @@
                             // show success toast
                             toastr.success("Item removed from cart!");
 
-                            // handle empty cart
+                            // handle empty cartt
                             if ($('tbody tr').length === 0) {
                                 $(".checkout-style-1").html(`
                             <div class="text-center p-4">
